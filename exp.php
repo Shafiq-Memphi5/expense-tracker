@@ -31,8 +31,7 @@ function help() // help function to display commands
   -  delete --id <id> Delete expense 
   -  update --id <id> Update expense
   -  list/ list --id <id> List all expenses or list a specific expense by ID
-  -  summary/ summary --month <m> Show summary of expenses or also summary by month
-  -  exit Exit\n
+  -  summary/ summary --month <m> Show summary of expenses or also summary by month\n
 ";
 }
 function parseArgs($args)
