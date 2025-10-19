@@ -31,7 +31,8 @@ function help() // help function to display commands
   -  delete --id <id> Delete expense 
   -  update --id <id> Update expense
   -  list/ list --id <id> List all expenses or list a specific expense by ID
-  -  summary/ summary --month <m> Show summary of expenses or also summary by month\n
+  -  summary/ summary --month <m> Show summary of expenses or also summary by month
+  -  exit Exit\n
 ";
 }
 function parseArgs($args)
@@ -130,7 +131,7 @@ switch ($cmd) {
                 echo "# ID  Date        Description             Amount\n";
                 foreach ($expenses as $expense) {
                     printf(
-                        "# %-3d %-10s %-20s \$%d\n",
+                        "# %-3d %-10s %-20s UGX %d\n",
                         $expense['id'],
                         $expense['date'],
                         $expense['desc'],
@@ -154,7 +155,7 @@ switch ($cmd) {
                 }
             }
             if ($found) {
-                $amount = '$' . $found['amt'];
+                $amount = 'UGX ' . $found['amt'];
                 printf(
                     "Expense Details:\n-ID: %d\n-Date: %s\n-Description: %s\n-Amount: %s\n",
                     $found['id'],
@@ -174,10 +175,8 @@ switch ($cmd) {
             foreach ($expenses as $expense) {
                 $sum += $expense['amt'];
             }
-            echo "Your total expenses are: $sum.\n";
-        }
-        else if ($argc > 2 && $argc < 5)
-        {
+            echo "Your total expenses are: UGX $sum.\n";
+        } else if ($argc > 2 && $argc < 5) {
             $options = parseArgs($args);
             $expenses = loadExpenses();
             if (empty($options['month']) || !in_array($options['month'], range(1, 12))) {
@@ -187,13 +186,51 @@ switch ($cmd) {
             $month = $options['month'];
             foreach ($expenses as $expense) {
                 $expenseMonth = date('m', strtotime($expense['date']));
+                $monthWords = '';
+                switch ($month) {
+                    case 1:
+                        $monthWords = "January";
+                        break;
+                    case 2:
+                        $monthWords = "February";
+                        break;
+                    case 3:
+                        $monthWords = "March";
+                        break;
+                    case 4:
+                        $monthWords = "April";
+                        break;
+                    case 5:
+                        $monthWords = "May";
+                        break;
+                    case 6:
+                        $monthWords = "June";
+                        break;
+                    case 7:
+                        $monthWords = "July";
+                        break;
+                    case 8:
+                        $monthWords = "August";
+                        break;
+                    case 9:
+                        $monthWords = "September";
+                        break;
+                    case 10:
+                        $monthWords = "October";
+                        break;
+                    case 11:
+                        $monthWords = "November";
+                        break;
+                    case 12:
+                        $monthWords = "December";
+                        break;
+                }
                 if ($expenseMonth === $month) {
-                    $sum += (int)$expense['amt'];
+                    $sum += (int) $expense['amt'];
                 }
             }
-            echo "Summary expenses for month $month: \$$sum\n";
-        }
-        else {
+            echo "Summary expenses for month $monthWords: UGX $sum\n";
+        } else {
             help();
         }
         break;
