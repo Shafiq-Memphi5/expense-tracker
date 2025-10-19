@@ -1,3 +1,5 @@
+#!/usr/bin/env php
+
 <?php
 define("file", __DIR__ . "/exp.json");
 echo "Hello welcome to expense tracker!\n";
