@@ -26,9 +26,10 @@ function help() // help function to display commands
 {
     echo "This is the help menu: 
   -  add --desc <desc> --amt <amt> --date <date(YYYY-MM-DD)> Add expense 
-  -  view --id <id> View expenses 
   -  delete --id <id> Delete expense 
-  -  update --id <id> Update expense 
+  -  update --id <id> Update expense
+  -  list/ list --id <id> List all expenses or list a specific expense by ID
+  -  summary/ summary --month <m> Show summary of expenses or also summary by month
   -  exit Exit\n
 ";
 }
@@ -71,34 +72,6 @@ switch ($cmd) {
         saveExpenses($expenses);
         echo "Expense added successfully!\n";
         break;
-    case strtolower("view"):
-        $options = parseArgs($args);
-        if (empty($options['id'])) {
-            echo "Please provide an ID to view.\n";
-            break;
-        }
-        $id = (int) $options['id'];
-        $expenses = loadExpenses();
-        $found = null;
-        foreach ($expenses as $expense) {
-            if ($expense['id'] == $id) {
-                $found = $expense;
-                break;
-            }
-        }
-        if ($found) {
-            $amount = '$' . $found['amt'];
-            printf(
-                "Expense Details:\n-ID: %d\n-Date: %s\n-Description: %s\n-Amount: %s\n",
-                $found['id'],
-                $found['date'],
-                $found['desc'],
-                $amount
-            );
-        } else {
-            echo "Expense with ID $id not found.\n";
-        }
-        break;
     case strtolower("delete"):
         $options = parseArgs($args);
         if (empty($options['id'])) {
@@ -124,10 +97,8 @@ switch ($cmd) {
         $id = (int) $options['id'];
         $expenses = loadExpenses();
         $found = null;
-        foreach ($expenses as $expense)
-        {
-            if ($expense['id'] == $id)
-            {
+        foreach ($expenses as $expense) {
+            if ($expense['id'] == $id) {
                 $found = $expense;
                 break;
             }
@@ -145,26 +116,84 @@ switch ($cmd) {
             }
             unset($expense); // break reference
             echo "Expense with ID $id updated successfully.\n";
-        }
-        else {
+        } else {
             echo "Expense with ID $id not found.\n";
         }
         break;
     case strtolower("list"):
-        $expenses = loadExpenses();
-        if (empty($expenses)) {
-            echo "No expenses found.\n";
-        } else {
-            echo "# ID  Date        Description             Amount\n";
-            foreach ($expenses as $expense) {
-                printf(
-                    "# %-3d %-10s %-20s \$%d\n",
-                    $expense['id'],
-                    $expense['date'],
-                    $expense['desc'],
-                    $expense['amt']
-                );
+        if ($argc == 2) {
+            $expenses = loadExpenses();
+            if (empty($expenses)) {
+                echo "No expenses found.\n";
+            } else {
+                echo "# ID  Date        Description             Amount\n";
+                foreach ($expenses as $expense) {
+                    printf(
+                        "# %-3d %-10s %-20s \$%d\n",
+                        $expense['id'],
+                        $expense['date'],
+                        $expense['desc'],
+                        $expense['amt']
+                    );
+                }
             }
+        } else if ($argc > 2) {
+            $options = parseArgs($args);
+            if (empty($options['id'])) {
+                echo "Please provide an ID to view.\n";
+                break;
+            }
+            $id = (int) $options['id'];
+            $expenses = loadExpenses();
+            $found = null;
+            foreach ($expenses as $expense) {
+                if ($expense['id'] == $id) {
+                    $found = $expense;
+                    break;
+                }
+            }
+            if ($found) {
+                $amount = '$' . $found['amt'];
+                printf(
+                    "Expense Details:\n-ID: %d\n-Date: %s\n-Description: %s\n-Amount: %s\n",
+                    $found['id'],
+                    $found['date'],
+                    $found['desc'],
+                    $amount
+                );
+            } else {
+                echo "Expense with ID $id not found.\n";
+            }
+        }
+        break;
+    case strtolower("summary"):
+        $expenses = loadExpenses();
+        $sum = 0;
+        if ($argc === 2) {
+            foreach ($expenses as $expense) {
+                $sum += $expense['amt'];
+            }
+            echo "Your total expenses are: $sum.\n";
+        }
+        else if ($argc > 2 && $argc < 5)
+        {
+            $options = parseArgs($args);
+            $expenses = loadExpenses();
+            if (empty($options['month']) || !in_array($options['month'], range(1, 12))) {
+                echo "Please provide a month (1-12) to summarize.\n";
+                break;
+            }
+            $month = $options['month'];
+            foreach ($expenses as $expense) {
+                $expenseMonth = date('m', strtotime($expense['date']));
+                if ($expenseMonth === $month) {
+                    $sum += (int)$expense['amt'];
+                }
+            }
+            echo "Summary expenses for month $month: \$$sum\n";
+        }
+        else {
+            help();
         }
         break;
     case strtolower("help"):
